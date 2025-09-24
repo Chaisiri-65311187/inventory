@@ -1,0 +1,32 @@
+/* --- Reset เบื้องต้นให้ Bootstrap ทำงานได้ตามปกติ --- */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+/* อย่าใช้ flex กับ body (ของเดิมมี) เพราะจะไปชนกับ layout อื่น */
+body {
+  background: #f8f9fa; /* พื้นหลังอ่อนแบบ Bootstrap */
+  color: #212529;      /* สีตัวอักษรมาตรฐาน */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* ปล่อยปุ่มให้ใช้สไตล์ของ Bootstrap ไม่ override เอง */
+button { all: unset; }
+button { /* คืนค่าเบสิคให้ clickable + ใช้ class ของ Bootstrap ครอบ */
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* ยูทิลิตี้ใช้ครอบทั้งหน้าให้เต็มจอ + จัดกลาง */
+.page-full {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* กันจอเล็กให้การ์ดไม่ติดขอบ */
+.page-padding {
+  padding: 0 16px;
+}

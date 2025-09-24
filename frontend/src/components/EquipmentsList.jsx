@@ -52,7 +52,7 @@ export default function EquipmentsList() {
     }
   }
 
-  async function onDelete(id){
+  async function onDelete(id) {
     if (!window.confirm("ยืนยันลบอุปกรณ์นี้?")) return;
     try {
       await removeEquipment(id);
@@ -75,7 +75,7 @@ export default function EquipmentsList() {
   );
 
   return (
-    <div className="min-vh-100 d-flex flex-column" style={{background:"linear-gradient(135deg,#f7f8ff 0%,#fff9f4 50%,#f5f2ff 100%)"}}>
+    <div className="min-vh-100 d-flex flex-column" style={{ background: "linear-gradient(135deg,#f7f8ff 0%,#fff9f4 50%,#f5f2ff 100%)" }}>
       <div className="container-xxl my-4 flex-grow-1">
         {/* Page Header */}
         <header className="page-header mb-3">
@@ -92,7 +92,7 @@ export default function EquipmentsList() {
               <Link to="/" className="btn btn-outline-secondary btn-sm">กลับหน้าหลัก</Link>
               <Link to="/equipments/new" className="btn btn-primary btn-sm">+ เพิ่มอุปกรณ์</Link>
             </div>
-            
+
           </div>
           <h1 className="page-title mt-1">รายการอุปกรณ์</h1>
           <p className="page-subtitle">ค้นหา แก้ไข หรือลบอุปกรณ์จากฐานข้อมูล</p>
@@ -107,8 +107,8 @@ export default function EquipmentsList() {
                 <div className="input-group">
                   <span className="input-group-text bg-light">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <circle cx="11" cy="11" r="7" stroke="currentColor"/>
-                      <path d="M20 20l-3-3" stroke="currentColor" strokeLinecap="round"/>
+                      <circle cx="11" cy="11" r="7" stroke="currentColor" />
+                      <path d="M20 20l-3-3" stroke="currentColor" strokeLinecap="round" />
                     </svg>
                   </span>
                   <input
@@ -118,7 +118,7 @@ export default function EquipmentsList() {
                     onChange={(e) => setQ(e.target.value)}
                   />
                   {q && (
-                    <button className="btn btn-outline-secondary" type="button" onClick={()=>setQ("")}>
+                    <button className="btn btn-outline-secondary" type="button" onClick={() => setQ("")}>
                       ล้าง
                     </button>
                   )}
@@ -128,8 +128,8 @@ export default function EquipmentsList() {
               <div className="col-6 col-lg-4">
                 <label className="form-label mb-1">แสดงต่อหน้า</label>
                 <select className="form-select"
-                        value={pageSize}
-                        onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}>
+                  value={pageSize}
+                  onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}>
                   <option>10</option><option>20</option><option>50</option>
                 </select>
               </div>
@@ -156,8 +156,8 @@ export default function EquipmentsList() {
                 <tbody>
                   {loading ? (
                     <>
-                      <SkeletonRow/><SkeletonRow/><SkeletonRow/><SkeletonRow/><SkeletonRow/>
-                      <SkeletonRow/><SkeletonRow/><SkeletonRow/><SkeletonRow/><SkeletonRow/>
+                      <SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow />
+                      <SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow /><SkeletonRow />
                     </>
                   ) : rows.length === 0 ? (
                     <tr><td colSpan="5" className="text-center text-muted py-4">ไม่พบข้อมูล</td></tr>
@@ -172,7 +172,10 @@ export default function EquipmentsList() {
                           <button className="btn btn-sm btn-outline-secondary" onClick={() => onView(r.equipment_id)}>
                             รายละเอียด
                           </button>
-                          <Link to={`/equipments/${r.equipment_id}/edit`} className="btn btn-sm btn-outline-primary">
+                          <Link
+                            to={`/equipments/${r.equipment_id}/edit`}
+                            className="btn btn-sm btn-outline-primary"
+                          >
                             แก้ไข
                           </Link>
                           <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(r.equipment_id)}>
@@ -195,8 +198,8 @@ export default function EquipmentsList() {
 
             <nav aria-label="pagination">
               <ul className="pagination mb-0">
-                <li className={`page-item ${!canPrev ? "disabled":""}`}>
-                  <button className="page-link" onClick={()=> canPrev && setPage(p=>p-1)}>Prev</button>
+                <li className={`page-item ${!canPrev ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={() => canPrev && setPage(p => p - 1)}>Prev</button>
                 </li>
                 {Array.from({ length: pages }, (_, idx) => idx + 1).slice(
                   Math.max(0, page - 3), Math.max(0, page - 3) + 5
@@ -205,8 +208,8 @@ export default function EquipmentsList() {
                     <button className="page-link" onClick={() => setPage(n)}>{n}</button>
                   </li>
                 ))}
-                <li className={`page-item ${!canNext ? "disabled":""}`}>
-                  <button className="page-link" onClick={()=> canNext && setPage(p=>p+1)}>Next</button>
+                <li className={`page-item ${!canNext ? "disabled" : ""}`}>
+                  <button className="page-link" onClick={() => canNext && setPage(p => p + 1)}>Next</button>
                 </li>
               </ul>
             </nav>
@@ -273,6 +276,9 @@ export default function EquipmentsList() {
         </div>
 
       </div>
+      <footer className="py-3 text-center text-muted small">
+        © {new Date().getFullYear()} Equipment Manager
+      </footer>
     </div>
   );
 }

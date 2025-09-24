@@ -278,6 +278,83 @@ app.delete('/api/equipments/:id', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /api/equipments/:id/full
+app.get('/api/equipments/:id/full', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ message: 'invalid id' });
+
+    const [rows] = await pool.query(`
+      SELECT
+        e.equipment_id, e.equipment_name, e.brand_id, e.type_id,
+        d.asset_code, d.service_code, d.price, d.description,
+        d.start_date, d.status, d.warranty_expire
+      FROM equipments e
+      LEFT JOIN equipmentdetails d ON d.equipment_id = e.equipment_id
+      WHERE e.equipment_id = ?
+      LIMIT 1
+    `, [id]);
+
+    if (!rows.length) return res.status(404).json({ message: 'not found' });
+    res.json(rows[0]);
+  } catch (e) { next(e); }
+});
+// PUT /api/equipments/:id
+app.put('/api/equipments/:id', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ message: 'invalid id' });
+
+    const {
+      equipment_name, brand_id, type_id,
+      asset_code, service_code, price, description,
+      start_date, status, warranty_expire
+    } = req.body || {};
+
+    // 1) update ตารางหลัก
+    await pool.query(
+      `UPDATE equipments
+         SET equipment_name=?, brand_id=?, type_id=?
+       WHERE equipment_id=?`,
+      [equipment_name, brand_id || null, type_id || null, id]
+    );
+
+    // 2) มีแถวใน details แล้วหรือยัง
+    const [[{ cnt }]] = await pool.query(
+      `SELECT COUNT(*) cnt FROM equipmentdetails WHERE equipment_id=?`,
+      [id]
+    );
+
+    if (cnt > 0) {
+      // update
+      await pool.query(
+        `UPDATE equipmentdetails
+            SET asset_code=?,
+                service_code=?,
+                price=?,
+                description=?,
+                start_date=?,
+                status=?,
+                warranty_expire=?
+          WHERE equipment_id=?`,
+        [asset_code || null, service_code || null, price || null, description || null,
+         start_date || null, status || null, warranty_expire || null, id]
+      );
+    } else {
+      // insert ถ้ายังไม่มี
+      await pool.query(
+        `INSERT INTO equipmentdetails
+          (equipment_id, asset_code, service_code, price, description, start_date, status, warranty_expire)
+         VALUES (?,?,?,?,?,?,?,?)`,
+        [id, asset_code || null, service_code || null, price || null, description || null,
+         start_date || null, status || null, warranty_expire || null]
+      );
+    }
+
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
 // 6) global error handler (ต้องอยู่ท้าย routes)
 app.use((err, _req, res, _next) => {
   console.error('GLOBAL ERROR:', err);

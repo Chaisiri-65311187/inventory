@@ -322,6 +322,9 @@ export default function EquipmentCreate(){
           แนะนำ: กำหนดรูปแบบรหัสครุภัณฑ์ให้สอดคล้องกัน เช่น <code>CSIT-IT-000123</code> เพื่อให้ง่ายต่อการค้นหาและรายงาน
         </div>
       </div>
+      <footer className="py-3 text-center text-muted small">
+        © {new Date().getFullYear()} Equipment Manager
+      </footer>
     </div>
   );
 }

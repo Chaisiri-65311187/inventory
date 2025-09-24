@@ -50,6 +50,22 @@ export async function removeEquipment(id) {
   return data; // { ok:true }
 }
 
+export function fetchEquipmentFull(id) {
+  return getJSON(`${API_BASE}/api/equipments/${id}/full`);
+}
+
+export async function updateEquipment(id, payload) {
+  const res = await fetch(`${API_BASE}/api/equipments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!res.ok) throw new Error(data?.message || 'Update failed');
+  return data; // { ok:true }
+}
+
 export const fetchStats = () => getJSON(`${API_BASE}/api/stats`);
 
 export const fetchLatestEquipments = (limit = 6) =>

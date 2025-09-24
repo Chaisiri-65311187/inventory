@@ -67,7 +67,7 @@ export default function WarrantyExpiringPage(){
             </nav>
             <Link to="/" className="btn btn-outline-secondary btn-sm">กลับหน้าหลัก</Link>
           </div>
-          <h1 className="page-title mt-1">รายการอุปกรณ์ (ใกล้หมดประกัน)</h1>
+          <h1 className="page-title mt-1">รายการอุปกรณ์ (ระยะเวลาเหลือการรับประกัน)</h1>
           <p className="page-subtitle">ตรวจสอบสถานะการรับประกัน เพื่อวางแผนซ่อม/ต่อประกันได้ทันเวลา</p>
         </header>
 
@@ -202,6 +202,9 @@ export default function WarrantyExpiringPage(){
         </div>
 
       </div>
+      <footer className="py-3 text-center text-muted small">
+        © {new Date().getFullYear()} Equipment Manager
+      </footer>
     </div>
   );
 }

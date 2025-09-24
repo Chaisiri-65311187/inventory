@@ -189,13 +189,13 @@ export default function HomePage() {
             <div className="card shadow-sm border-0 h-100">
               <div className="card-header bg-white fw-semibold d-flex align-items-center gap-2">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 2v3M17 2v3M3 9h18M5 7h14v13H5z" stroke="currentColor" strokeLinecap="round"/></svg>
-                ใกล้หมดประกัน
+                ระยะเวลาเหลือการรับประกัน
               </div>
               <div className="card-body">
                 {loading ? (
                   <Skeleton height={160} />
                 ) : expiring.length === 0 ? (
-                  <div className="text-muted">ไม่มีรายการใกล้หมดประกัน</div>
+                  <div className="text-muted">ไม่มีรายการ</div>
                 ) : (
                   <ul className="list-group list-group-flush">
                     {expiring.map(row => {

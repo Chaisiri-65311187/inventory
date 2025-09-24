@@ -203,6 +203,9 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+      <footer className="py-3 text-center text-muted small">
+        © {new Date().getFullYear()} Equipment Manager
+      </footer>
     </div>
   );
 }

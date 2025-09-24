@@ -118,7 +118,7 @@ export default function EquipmentCreate(){
       </ol>
     </nav>
 
-    <Link to="/equipments" className="btn btn-outline-secondary btn-sm">กลับรายการ</Link>
+    <Link to="/" className="btn btn-outline-secondary btn-sm">กลับหน้าหลัก</Link>
   </div>
 
   <h1 className="page-title mt-1">เพิ่มข้อมูลอุปกรณ์</h1>
@@ -303,7 +303,7 @@ export default function EquipmentCreate(){
 
               {/* Sticky Actions */}
               <div className="mt-4 d-flex gap-2 justify-content-end sticky-actions">
-                <Link to="/equipments" className="btn btn-outline-secondary">ยกเลิก</Link>
+                <Link to="/" className="btn btn-outline-secondary">ยกเลิก</Link>
                 <button className="btn btn-primary px-4" disabled={submitting}>
                   {submitting ? (
                     <span className="d-inline-flex align-items-center gap-2">

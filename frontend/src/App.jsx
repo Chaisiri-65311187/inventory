@@ -2,6 +2,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import LoginPage from "./components/LoginPage";
 import EquipmentCreate from "./components/EquipmentCreate";
+import WarrantyExpiringPage from "./components/WarrantyExpiringPage";
+import EquipmentsList from "./components/EquipmentsList";
+
 
 function readJSONSafe(key, fallback = null) {
   try {
@@ -25,7 +28,12 @@ export default function App() {
       <Route path="/equipments/new" element={
         <RequireAuth><EquipmentCreate /></RequireAuth>
       } />
-
+      <Route path="/reports/expiring" element={
+        <RequireAuth><WarrantyExpiringPage /></RequireAuth>
+      } />
+      <Route path="/equipments" element={
+  <RequireAuth><EquipmentsList /></RequireAuth>
+} />
     </Routes>
   );
 }

@@ -176,6 +176,108 @@ app.get('/api/types', async (_req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// GET /api/warranty/list?status=soon&days=30&q=&page=1&pageSize=10
+app.get('/api/warranty/list', async (req, res, next) => {
+  try {
+    const status   = (req.query.status || 'soon').toLowerCase(); // soon|expired|active|all
+    const days     = Math.max(1, Number(req.query.days || 30));
+    const q        = (req.query.q || '').trim();
+    const page     = Math.max(1, Number(req.query.page || 1));
+    const pageSize = Math.min(50, Math.max(5, Number(req.query.pageSize || 10)));
+    const offset   = (page - 1) * pageSize;
+
+    const where = [];
+    const p = [];
+
+    if (q) {
+      where.push(`(e.equipment_name LIKE ? OR b.brand_name LIKE ? OR t.type_name LIKE ?
+                   OR d.asset_code LIKE ? OR d.service_code LIKE ?)`);
+      for (let i=0;i<5;i++) p.push(`%${q}%`);
+    }
+    if (status === 'soon') {
+      where.push(`d.warranty_expire IS NOT NULL
+                  AND d.warranty_expire >= CURDATE()
+                  AND d.warranty_expire <= DATE_ADD(CURDATE(), INTERVAL ? DAY)`);
+      p.push(days);
+    } else if (status === 'expired') {
+      where.push(`d.warranty_expire IS NOT NULL AND d.warranty_expire < CURDATE()`);
+    } else if (status === 'active') {
+      where.push(`d.warranty_expire IS NOT NULL
+                  AND d.warranty_expire > DATE_ADD(CURDATE(), INTERVAL ? DAY)`);
+      p.push(days);
+    } else {
+      where.push(`d.warranty_expire IS NOT NULL`);
+    }
+
+    const whereSQL = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+    const base = `
+      FROM equipmentdetails d
+      JOIN equipments e ON d.equipment_id = e.equipment_id
+      LEFT JOIN brands b ON e.brand_id = b.brand_id
+      LEFT JOIN equipmenttypes t ON e.type_id = t.type_id
+      ${whereSQL}
+    `;
+
+    const [[{ total }]] = await pool.query(`SELECT COUNT(*) total ${base}`, p);
+
+    const [rows] = await pool.query(
+      `SELECT e.equipment_id, e.equipment_name,
+              b.brand_name, t.type_name,
+              d.asset_code, d.service_code,
+              d.start_date, d.warranty_expire,
+              DATEDIFF(d.warranty_expire, CURDATE()) AS days_left
+       ${base}
+       ORDER BY d.warranty_expire ASC
+       LIMIT ? OFFSET ?`,
+      [...p, pageSize, offset]
+    );
+
+    res.json({ data: rows, page, pageSize, total });
+  } catch (e) { next(e); }
+});
+
+app.get('/api/equipments', async (req, res) => {
+  const q = `%${(req.query.q || '').trim()}%`;
+  const page = Math.max(1, Number(req.query.page || 1));
+  const pageSize = Math.min(50, Math.max(5, Number(req.query.pageSize || 10)));
+  const offset = (page - 1) * pageSize;
+
+  const [rows] = await pool.query(`
+    SELECT e.equipment_id, e.equipment_name, b.brand_name, t.type_name
+    FROM equipments e
+    LEFT JOIN brands b ON e.brand_id=b.brand_id
+    LEFT JOIN equipmenttypes t ON e.type_id=t.type_id
+    WHERE e.equipment_name LIKE ? OR b.brand_name LIKE ? OR t.type_name LIKE ?
+    ORDER BY e.equipment_id DESC
+    LIMIT ? OFFSET ?`, [q, q, q, pageSize, offset]);
+
+  const [[{ total }]] = await pool.query(`
+    SELECT COUNT(*) total
+    FROM equipments e
+    LEFT JOIN brands b ON e.brand_id=b.brand_id
+    LEFT JOIN equipmenttypes t ON e.type_id=t.type_id
+    WHERE e.equipment_name LIKE ? OR b.brand_name LIKE ? OR t.type_name LIKE ?`, [q, q, q]);
+
+  res.json({ data: rows, page, pageSize, total });
+});
+
+app.delete('/api/equipments/:id', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ message: 'invalid id' });
+
+    // log ดูที่ฝั่ง server เวลากดลบ
+    console.log('DELETE /api/equipments/', id);
+
+    // ถ้าตั้ง FK CASCADE แล้ว ลบที่แม่พอ
+    const [r] = await pool.query('DELETE FROM equipments WHERE equipment_id=?', [id]);
+
+    if (!r.affectedRows) return res.status(404).json({ message: 'not found' });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
 // 6) global error handler (ต้องอยู่ท้าย routes)
 app.use((err, _req, res, _next) => {
   console.error('GLOBAL ERROR:', err);

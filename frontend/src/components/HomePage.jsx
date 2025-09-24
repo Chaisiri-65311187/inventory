@@ -150,7 +150,6 @@ export default function HomePage() {
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeLinecap="round"/></svg>
                   อุปกรณ์ที่เพิ่มล่าสุด
                 </span>
-                <Link to="/equipments" className="btn btn-sm btn-outline-primary">ดูทั้งหมด</Link>
               </div>
               <div className="card-body p-0">
                 {loading ? (
@@ -163,8 +162,7 @@ export default function HomePage() {
                           <th>รหัส</th>
                           <th>ชื่ออุปกรณ์</th>
                           <th>ยี่ห้อ</th>
-                          <th>ประเภท</th>
-                          <th className="text-end">การจัดการ</th>
+                          <th>ประเภท</th>                 
                         </tr>
                       </thead>
                       <tbody>
@@ -176,9 +174,6 @@ export default function HomePage() {
                             <td>{it.equipment_name}</td>
                             <td>{it.brand_name || '-'}</td>
                             <td>{it.type_name || '-'}</td>
-                            <td className="text-end">
-                              <Link to={`/equipments/${it.equipment_id}`} className="btn btn-sm btn-outline-primary">รายละเอียด</Link>
-                            </td>
                           </tr>
                         ))}
                       </tbody>

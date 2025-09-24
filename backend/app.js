@@ -1,34 +1,40 @@
+// backend/app.js  (เวอร์ชันสะอาด ใช้ employees)
+
+// 1) imports + init
 const express = require('express');
-const Quote =  require('inspirational-quotes');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const mysql = require('mysql2');
+const pool = require('./db');     // ต้อง export pool จาก db.js (mysql2/promise.createPool)
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
 
-// ปรับค่าตามเครื่องของคุณ
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',           // ถ้ามีให้ใส่
-  database: 'inventorydb' // ชื่อตามที่คุณใช้อยู่
-});
+// 2) middlewares (เรียกครั้งเดียวพอ)
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5177'],   
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+}));                     
+app.use(express.json());                          
 
-// Login แบบง่าย (เทียบรหัส plain text)
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body || {};
-  if (!username || !password) {
-    return res.status(400).json({ message: 'กรอกข้อมูลไม่ครบ' });
-  }
+// 3) health check
+app.get('/api/ping', (_req, res) => res.json({ ok: true }));
 
-  const sql = `
-    SELECT employee_id, employee_name, username, password, email, position
-    FROM employees WHERE username = ? LIMIT 1
-  `;
-  db.query(sql, [username], (err, rows) => {
-    if (err) return res.status(500).json({ message: 'Server error' });
+// 4) LOGIN — ใช้ตาราง employees
+app.post('/api/login', async (req, res, next) => {
+  try {
+    console.log('LOGIN body:', req.body);
+    const { username, password } = req.body || {};
+    if (!username || !password) {
+      return res.status(400).json({ message: 'กรอกข้อมูลไม่ครบ' });
+    }
+
+    const [rows] = await pool.query(
+      `SELECT employee_id, employee_name, username, password, email, position
+         FROM employees
+        WHERE username = ?
+        LIMIT 1`,
+      [username]
+    );
+
     if (!rows.length) return res.status(401).json({ message: 'ไม่พบบัญชีผู้ใช้' });
 
     const u = rows[0];
@@ -36,16 +42,146 @@ app.post('/api/login', (req, res) => {
       return res.status(401).json({ message: 'รหัสผ่านไม่ถูกต้อง' });
     }
 
-    const user = {
+    // ส่งค่าที่ front ใช้ (ชื่อฟิลด์ให้เรียบง่าย)
+    res.json({
       id: u.employee_id,
       username: u.username,
       name: u.employee_name,
       email: u.email,
       role: u.position || 'staff',
-    };
-    res.json({ user });
-  });
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`✅ Backend running http://localhost:${PORT}`));
+// 5) Dashboard APIs
+app.get('/api/stats', async (_req, res, next) => {
+  try {
+    const [[{ totalEquip }]]   = await pool.query(`SELECT COUNT(*) totalEquip FROM equipments`);
+    const [[{ totalBrands }]]  = await pool.query(`SELECT COUNT(*) totalBrands FROM brands`);
+    const [[{ totalTypes }]]   = await pool.query(`SELECT COUNT(*) totalTypes FROM equipmenttypes`);
+    const [[{ expiringIn30 }]] = await pool.query(`
+      SELECT COUNT(*) expiringIn30
+        FROM equipmentdetails
+       WHERE warranty_expire IS NOT NULL
+         AND warranty_expire >= CURDATE()
+         AND warranty_expire < DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+    `);
+    res.json({ totalEquip, totalBrands, totalTypes, expiringIn30 });
+  } catch (e) { next(e); }
+});
+
+app.get('/api/equipments/latest', async (req, res, next) => {
+  try {
+    const limit = Math.min(20, Math.max(1, Number(req.query.limit || 6)));
+    const [rows] = await pool.query(`
+      SELECT e.equipment_id, e.equipment_name, b.brand_name, t.type_name
+        FROM equipments e
+        LEFT JOIN brands b ON e.brand_id=b.brand_id
+        LEFT JOIN equipmenttypes t ON e.type_id=t.type_id
+       ORDER BY e.equipment_id DESC
+       LIMIT ?`, [limit]);
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+app.get('/api/warranty/expiring', async (_req, res, next) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT e.equipment_id, e.equipment_name, b.brand_name, t.type_name,
+             d.warranty_expire,
+             DATEDIFF(d.warranty_expire, CURDATE()) AS days_left
+        FROM equipmentdetails d
+        JOIN equipments e ON d.equipment_id=e.equipment_id
+        LEFT JOIN brands b ON e.brand_id=b.brand_id
+        LEFT JOIN equipmenttypes t ON e.type_id=t.type_id
+       WHERE d.warranty_expire IS NOT NULL
+       ORDER BY d.warranty_expire ASC
+       LIMIT 10
+    `);
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+app.post('/api/equipments', async (req, res, next) => {
+  try {
+    const {
+      equipment_name,
+      brand_id,
+      type_id,
+      asset_code,
+      service_code,
+      price,
+      description,
+      start_date,
+      status,
+      warranty_expire,
+    } = req.body || {};
+
+    if (!equipment_name) {
+      return res.status(400).json({ message: 'กรอกชื่ออุปกรณ์' });
+    }
+
+    // 1) insert ที่ตารางหลัก equipments
+    const [r1] = await pool.query(
+      `INSERT INTO equipments (equipment_name, brand_id, type_id)
+       VALUES (?,?,?)`,
+      [equipment_name, brand_id || null, type_id || null]
+    );
+
+    // 2) insert รายละเอียดใน equipmentdetails
+    await pool.query(
+      `INSERT INTO equipmentdetails
+        (equipment_id, asset_code, service_code, price, description, start_date, status, warranty_expire)
+       VALUES (?,?,?,?,?,?,?,?)`,
+      [
+        r1.insertId,
+        asset_code || null,
+        service_code || null,
+        price || null,
+        description || null,
+        start_date || null,
+        status || null,
+        warranty_expire || null,
+      ]
+    );
+
+    res.json({ id: r1.insertId, message: 'เพิ่มข้อมูลสำเร็จ' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/api/brands', async (_req, res, next) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT brand_id, brand_name
+         FROM brands
+        ORDER BY brand_name`
+    );
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// อ้างอิงประเภทอุปกรณ์
+app.get('/api/types', async (_req, res, next) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT type_id, type_name
+         FROM equipmenttypes
+        ORDER BY type_name`
+    );
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// 6) global error handler (ต้องอยู่ท้าย routes)
+app.use((err, _req, res, _next) => {
+  console.error('GLOBAL ERROR:', err);
+  res.status(500).json({ message: 'Server error', detail: String(err?.message || err) });
+});
+
+
+// 7) start
+app.listen(3000, () => console.log('✅ Backend running: http://localhost:3000'));

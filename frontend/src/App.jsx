@@ -1,26 +1,31 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./components/LoginPage.jsx";
-import HomePage from "./components/HomePage.jsx";
+import HomePage from "./components/HomePage";
+import LoginPage from "./components/LoginPage";
+import EquipmentCreate from "./components/EquipmentCreate";
 
-const PrivateRoute = ({ children }) => {
-  const raw = localStorage.getItem("auth_user");
-  return raw ? children : <Navigate to="/login" replace />;
-};
+function readJSONSafe(key, fallback = null) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw || raw === "undefined") return fallback;
+    return JSON.parse(raw);
+  } catch { return fallback; }
+}
+
+function RequireAuth({ children }) {
+  const user = readJSONSafe("auth_user");
+  return user ? children : <Navigate to="/login" replace />;
+}
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/home"
-        element={
-          <PrivateRoute>
-            <HomePage />
-          </PrivateRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<RequireAuth><HomePage /></RequireAuth>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/equipments/new" element={
+        <RequireAuth><EquipmentCreate /></RequireAuth>
+      } />
+
     </Routes>
   );
 }

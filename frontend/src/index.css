@@ -30,3 +30,97 @@ button { /* คืนค่าเบสิคให้ clickable + ใช้ cla
 .page-padding {
   padding: 0 16px;
 }
+
+/* KPI icon box */
+.kpi-icon { width: 48px; height: 48px; background: #f3f1ff; color: #6a5acd; }
+/* Card hover for clickable cards */
+a .kpi-card { transition: transform .12s ease, box-shadow .12s ease; }
+a .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important; }
+/* Better placeholder corners */
+.placeholder { border-radius: 12px; }
+
+/* หัวข้อย่อยในฟอร์ม */
+.section-title .bullet{
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #6a5acd; display: inline-block;
+  box-shadow: 0 0 0 4px rgba(106,90,205,.12);
+}
+
+/* ปุ่มบันทึกแบบ sticky ด้านล่าง card */
+.sticky-actions{
+  position: sticky; bottom: 0; background: #fff;
+  padding-top: .5rem; padding-bottom: .25rem;
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+
+/* ปรับ placeholder skeleton ให้โค้งมนสวยขึ้น (ตอนโหลดครั้งแรก) */
+.placeholder{ border-radius: 16px; }
+
+/* จุดนำหน้าหัวข้อย่อยในฟอร์ม */
+.section-title .bullet{
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #6a5acd; display: inline-block;
+  box-shadow: 0 0 0 4px rgba(106,90,205,.12);
+}
+
+/* ปุ่มบันทึกแบบ sticky ติดขอบล่างของพื้นที่การ์ด */
+.sticky-actions{
+  position: sticky; bottom: 0; background: #fff;
+  padding-top: .5rem; padding-bottom: .25rem;
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+
+/* สวยงามช่วงรอโหลด */
+.placeholder{ border-radius: 16px; }
+
+/* โฟกัสฟอร์มดูนุ่มตา */
+.form-control:focus, .form-select:focus{
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 .2rem rgba(139,92,246,.15) !important;
+}
+/* จุดนำหน้าหัวข้อย่อยในฟอร์ม */
+.section-title .bullet{
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #6a5acd; display: inline-block;
+  box-shadow: 0 0 0 4px rgba(106,90,205,.12);
+}
+
+/* ===== Page Header ===== */
+.page-header { margin-top: .25rem; }
+
+.breadcrumb-wrap .breadcrumb {
+  --bs-breadcrumb-divider: "›";
+  font-size: .9rem;
+}
+
+.crumb-link {
+  color: #6a5acd;
+  text-decoration: none;
+}
+.crumb-link:hover {
+  color: #5b4bd6;
+  text-decoration: underline;
+}
+
+.page-title {
+  font-size: 1.6rem;         /* ใหญ่กว่าข้อความทั่วไปเล็กน้อย */
+  font-weight: 700;
+  margin: .25rem 0 0;
+  letter-spacing: .2px;
+}
+
+.page-subtitle {
+  margin: .25rem 0 0;
+  color: #6c757d;            /* เทาอ่านง่าย */
+  font-size: .95rem;
+  line-height: 1.45;
+  max-width: 56rem;          /* ไม่กว้างเกินไป */
+}
+
+/* มือถือ: ลดขนาดตัวอักษรและเว้นระยะ */
+@media (max-width: 576px) {
+  .page-title { font-size: 1.35rem; }
+  .page-subtitle { font-size: .92rem; }
+  .breadcrumb-wrap .breadcrumb { font-size: .85rem; }
+}
+

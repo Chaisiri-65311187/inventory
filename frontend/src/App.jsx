@@ -5,6 +5,8 @@ import EquipmentCreate from "./components/EquipmentCreate";
 import WarrantyExpiringPage from "./components/WarrantyExpiringPage";
 import EquipmentsList from "./components/EquipmentsList";
 import EquipmentEdit from "./components/EquipmentEdit";
+import BrandsPage from "./components/BrandsPage";
+import TypesPage from "./components/TypesPage";
 
 
 function readJSONSafe(key, fallback = null) {
@@ -38,7 +40,12 @@ export default function App() {
       <Route path="/equipments/:id/edit" element={
         <RequireAuth><EquipmentEdit /></RequireAuth>
       } />
+      <Route path="/brands" element={
+        <RequireAuth><BrandsPage /></RequireAuth>
+      } />
+      <Route path="/types" element={
+        <RequireAuth><TypesPage /></RequireAuth>
+      } />
     </Routes>
-
   );
 }

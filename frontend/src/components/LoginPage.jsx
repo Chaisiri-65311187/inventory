@@ -156,15 +156,7 @@ export default function LoginPage() {
           </div>
 
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox" id="remember" />
-              <label className="form-check-label small text-muted" htmlFor="remember">
-                จำฉันไว้ในเครื่องนี้
-              </label>
-            </div>
-            <a className="small" href="#" onClick={(e) => e.preventDefault()}>
-              ลืมรหัสผ่าน?
-            </a>
+         
           </div>
 
           <button
@@ -201,11 +193,10 @@ export default function LoginPage() {
             <div className="fw-semibold mb-1">คำแนะนำความปลอดภัย</div>
             ใช้งานบนอุปกรณ์ส่วนตัว และอย่าเผยแพร่รหัสผ่านให้ผู้อื่น
           </div>
-        </div>
-      </div>
-      <footer className="py-3 text-center text-muted small">
+        </div><footer className="py-3 text-center text-muted small">
         © {new Date().getFullYear()} Equipment Manager
       </footer>
+      </div>
     </div>
   );
 }

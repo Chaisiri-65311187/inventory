@@ -82,9 +82,6 @@ export default function HomePage() {
             <h4 className="mb-1 fw-bold">แผงควบคุม</h4>
             <div className="text-muted small">ภาพรวมทรัพย์สินและสถานะประกัน</div>
           </div>
-          <div className="d-flex gap-2">
-            <Link to="/reports/expiring" className="btn btn-outline-secondary btn-sm">รายงานประกัน</Link>
-          </div>
         </div>
 
         {error && <div className="alert alert-danger">โหลดข้อมูลล้มเหลว: {error}</div>}
